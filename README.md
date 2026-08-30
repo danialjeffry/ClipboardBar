@@ -18,6 +18,8 @@ No Dock icon, no setup. It just works.
 - **History** — keeps your latest clips (up to 60), newest first.
 - **Quick re-copy** — click any clip to put it right back on your clipboard.
 - **Search** — filter your whole history by typing a few keywords.
+- **Date filter** — narrow history by **All Time / Today / Yesterday / Last 7 /
+  Last 30 days**, or pick a **custom start-to-end range**. Combines with search.
 - **Pin important clips** — pinned items are kept safe and stay at the top, so
   they're never pushed out by newer copies.
 - **Keyboard-first** — press **⌘⇧V** anywhere to open the panel, use **↑ / ↓** to

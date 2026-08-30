@@ -11,12 +11,13 @@ struct MenuBarView: View {
             header
             Divider()
             searchBar
+            dateFilterBar
             Divider()
             clipList
             Divider()
             footer
         }
-        .frame(width: 300, height: 460)
+        .frame(width: 300, height: 500)
     }
 
     private var header: some View {
@@ -55,6 +56,64 @@ struct MenuBarView: View {
         .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.15)))
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
+    }
+
+    private var dateFilterBar: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar")
+                    .foregroundColor(model.dateFilter.isActive ? .accentColor : .secondary)
+                Menu {
+                    ForEach(DateFilterKind.allCases, id: \.self) { kind in
+                        Button {
+                            model.dateFilter.kind = kind
+                        } label: {
+                            if kind == model.dateFilter.kind {
+                                Label(kind.title, systemImage: "checkmark")
+                            } else {
+                                Text(kind.title)
+                            }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(model.dateFilter.kind.title)
+                            .foregroundColor(.primary)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+
+                Spacer()
+
+                if model.dateFilter.isActive {
+                    Button {
+                        model.dateFilter.kind = .all
+                    } label: {
+                        Text("Clear")
+                    }
+                    .font(.caption)
+                    .buttonStyle(.plain)
+                    .foregroundColor(.accentColor)
+                }
+            }
+
+            if model.dateFilter.displayingCustom {
+                HStack(spacing: 8) {
+                    DatePicker("", selection: $model.dateFilter.customStart, displayedComponents: .date)
+                        .labelsHidden()
+                    Text("–")
+                        .foregroundColor(.secondary)
+                    DatePicker("", selection: $model.dateFilter.customEnd, displayedComponents: .date)
+                        .labelsHidden()
+                }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
     }
 
     private var clipList: some View {

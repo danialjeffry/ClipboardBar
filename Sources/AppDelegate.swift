@@ -282,7 +282,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             return true
         }
         if enter {
-            let clip = list[model.selectedIndex]
+            let safeIndex = min(max(model.selectedIndex, 0), list.count - 1)
+            let clip = list[safeIndex]
             handle(.copy(clip))
             return true
         }

@@ -24,10 +24,60 @@ struct Clip: Identifiable, Hashable, Codable {
     }
 }
 
+enum DateFilterKind: String, CaseIterable, Codable {
+    case all
+    case today
+    case yesterday
+    case last7
+    case last30
+    case custom
+
+    var title: String {
+        switch self {
+        case .all: return "All Time"
+        case .today: return "Today"
+        case .yesterday: return "Yesterday"
+        case .last7: return "Last 7 Days"
+        case .last30: return "Last 30 Days"
+        case .custom: return "Custom Range"
+        }
+    }
+}
+
+struct DateFilter {
+    var kind: DateFilterKind = .all
+    var customStart: Date = Calendar.current.startOfDay(for: Date())
+    var customEnd: Date = Calendar.current.startOfDay(for: Date()).addingTimeInterval(24 * 3600)
+
+    var isActive: Bool { kind != .all }
+
+    var displayingCustom: Bool { kind == .custom }
+
+    func matches(_ date: Date, calendar: Calendar = .current) -> Bool {
+        let day = calendar.dateInterval(of: .day, for: date)
+        switch kind {
+        case .all:
+            return true
+        case .today:
+            return calendar.isDateInToday(date)
+        case .yesterday:
+            return calendar.isDateInYesterday(date)
+        case .last7:
+            return date >= calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: Date())) ?? date
+        case .last30:
+            return date >= calendar.date(byAdding: .day, value: -29, to: calendar.startOfDay(for: Date())) ?? date
+        case .custom:
+            guard let day else { return false }
+            return day.start >= customStart && day.start < customEnd
+        }
+    }
+}
+
 @MainActor
 final class ClipboardModel: ObservableObject {
     @Published var clips: [Clip] = []
     @Published var searchText = ""
+    @Published var dateFilter = DateFilter()
     @Published var latestText = ""
 
     let maxClips = 60
@@ -40,11 +90,15 @@ final class ClipboardModel: ObservableObject {
 
     var filteredClips: [Clip] {
         let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let list = clips
-        guard !trimmed.isEmpty else { return list }
-        return list.filter { clip in
-            if clip.isImage { return "image".localizedCaseInsensitiveContains(trimmed) }
-            return clip.text.localizedCaseInsensitiveContains(trimmed)
+        return clips.filter { clip in
+            if trimmed.isEmpty == false {
+                if clip.isImage {
+                    if !"image".localizedCaseInsensitiveContains(trimmed) { return false }
+                } else if !clip.text.localizedCaseInsensitiveContains(trimmed) {
+                    return false
+                }
+            }
+            return dateFilter.matches(clip.date)
         }
     }
 
