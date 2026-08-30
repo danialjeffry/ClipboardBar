@@ -6,6 +6,8 @@ struct MenuBarView: View {
     @ObservedObject var model: ClipboardModel
     let action: (AppDelegate.Action) -> Void
 
+    @State private var showClearConfirmation = false
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -160,7 +162,7 @@ struct MenuBarView: View {
 
             if !model.clips.isEmpty {
                 Button(role: .destructive) {
-                    action(.clear)
+                    showClearConfirmation = true
                 } label: {
                     Label("Clear", systemImage: "trash")
                 }
@@ -169,6 +171,22 @@ struct MenuBarView: View {
         .font(.caption)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+        .confirmationDialog(
+            "Clear clips?",
+            isPresented: $showClearConfirmation,
+            titleVisibility: .visible
+        ) {
+            if !model.filteredClips.isEmpty && model.dateFilter.isActive {
+                Button("Clear filtered range only (\(model.filteredClips.count))", role: .destructive) {
+                    action(.clearRange)
+                }
+            }
+            Button("Clear all (\(model.clips.count))", role: .destructive) {
+                action(.clear)
+            }
+        } message: {
+            Text("Pinned clips are kept. This can't be undone.")
+        }
     }
 }
 

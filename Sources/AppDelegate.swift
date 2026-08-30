@@ -57,6 +57,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         case unpin(Clip)
         case delete(Clip)
         case clear
+        case clearRange
         case clearPinned
     }
 
@@ -74,9 +75,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             delete(clip)
         case .clear:
             model.clips = model.clips.filter { $0.pinned }
+            model.selectedIndex = 0
+            model.save()
+        case .clearRange:
+            let visible = Set(model.filteredClips.map { $0.id })
+            model.clips.removeAll { visible.contains($0.id) && !$0.pinned }
+            model.selectedIndex = 0
             model.save()
         case .clearPinned:
             model.clips = model.clips.filter { !$0.pinned }
+            model.selectedIndex = 0
             model.save()
         }
     }
