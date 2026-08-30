@@ -9,7 +9,13 @@ CONTENTS="${DEST}/Contents"
 MACOS="${CONTENTS}/MacOS"
 
 rm -rf "$DEST"
-mkdir -p "$MACOS"
+mkdir -p "$MACOS" "${CONTENTS}/Resources"
+
+echo "Generating app icon..."
+ICON_TMP="$(mktemp -d)"
+swift Scripts/make_icon.swift "$ICON_TMP"
+cp "$ICON_TMP/AppIcon.icns" "${CONTENTS}/Resources/AppIcon.icns"
+rm -rf "$ICON_TMP"
 
 echo "Compiling..."
 swiftc -O -target arm64-apple-macosx14.0 \
@@ -36,6 +42,8 @@ cat > "${CONTENTS}/Info.plist" <<'PLIST'
     <string>APPL</string>
     <key>CFBundleExecutable</key>
     <string>ClipboardBar</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>LSUIElement</key>
@@ -46,6 +54,9 @@ cat > "${CONTENTS}/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
+touch "${CONTENTS}/PkgInfo" 2>/dev/null || true
+
 codesign --force --sign - "$DEST" 2>/dev/null || true
 
 echo "Built ${DEST}"
+
