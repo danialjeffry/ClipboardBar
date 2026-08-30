@@ -60,8 +60,8 @@ struct MenuBarView: View {
     private var clipList: some View {
         ScrollView {
             LazyVStack(spacing: 4) {
-                ForEach(model.filteredClips) { clip in
-                    ClipRow(clip: clip, action: action)
+                ForEach(Array(model.filteredClips.enumerated()), id: \.element.id) { index, clip in
+                    ClipRow(clip: clip, isSelected: index == model.selectedIndex, action: action)
                 }
             }
             .padding(.horizontal, 8)
@@ -116,6 +116,7 @@ struct MenuBarView: View {
 @MainActor
 struct ClipRow: View {
     let clip: Clip
+    var isSelected: Bool = false
     let action: (AppDelegate.Action) -> Void
 
     private var preview: String {
@@ -132,12 +133,18 @@ struct ClipRow: View {
                 action(.copy(clip))
             } label: {
                 HStack(spacing: 10) {
-                    if clip.pinned {
+                    if let image = clip.image {
+                        Image(nsImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                    } else if clip.pinned {
                         Image(systemName: "pin.fill")
                             .foregroundColor(.orange)
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(preview)
+                        Text(clip.isImage ? "Image" : preview)
                             .font(.system(.body))
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
@@ -173,7 +180,10 @@ struct ClipRow: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.10)))
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(isSelected ? Color.accentColor.opacity(0.25) : Color.gray.opacity(0.10))
+        )
         .contextMenu {
             Button {
                 action(.copy(clip))
@@ -192,5 +202,41 @@ struct ClipRow: View {
                 Label("Delete", systemImage: "trash")
             }
         }
+    }
+}
+
+struct CopiedToastView: View {
+    let text: String
+    var image: NSImage? = nil
+
+    var body: some View {
+        HStack(spacing: 10) {
+            if let image {
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 32, height: 32)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+            } else {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+            }
+            Text(text)
+                .font(.system(.body))
+                .lineLimit(2)
+                .truncationMode(.tail)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.black.opacity(0.92))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+        )
+        .foregroundColor(.white)
     }
 }

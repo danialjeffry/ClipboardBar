@@ -20,9 +20,13 @@ No Dock icon, no setup. It just works.
 - **Search** — filter your whole history by typing a few keywords.
 - **Pin important clips** — pinned items are kept safe and stay at the top, so
   they're never pushed out by newer copies.
+- **Keyboard-first** — press **⌘⇧V** anywhere to open the panel, use **↑ / ↓** to
+  select and **Enter** to copy, **Esc** to close — never leave the keyboard.
+- **Image support** — screenshots and copied images are captured as thumbnails
+  and can be re-copied too.
+- **Persistent history** — your clips and pins survive app restarts.
 - **Delete / Clear** — remove a single clip, unpin everything, or wipe the
   unpinned history.
-- **Clipboard-only** — never touches files, images, or other formats; just text.
 
 ---
 
@@ -61,15 +65,21 @@ This compiles the Swift sources and outputs `ClipboardBar.app` in the project ro
 ## Usage
 
 1. Launch the app — you'll see the clipboard icon in the top-right menu bar.
-2. Copy anything (text) anywhere on your Mac.
-3. Click the icon to open ClipboardBar and see your history.
-4. **Click a clip** to copy it back to your clipboard, then paste wherever you need.
-5. Use the **search box** to find something specific, the **📌 pin** to keep
-   important clips around, and **Clear** to start fresh.
+2. Copy anything (text or image) anywhere on your Mac.
+3. **Mouse:** click the icon to open ClipboardBar and see your history.
+4. **Keyboard:** press **⌘⇧V** anywhere to open the panel instantly, use **↑ / ↓**
+   to highlight a clip, **Enter** to copy it (and close), **Esc** to dismiss.
+5. **Click a clip** (or press Enter on it) to copy it back to your clipboard, then
+   paste wherever you need.
+6. Use the **search box** to filter, the **📌 pin** to keep important clips safe,
+   and **Clear** to start fresh. Everything is saved automatically.
 
-> Note: On first run, if your Mac requests clipboard/pasteboard access in
-> **System Settings → Privacy & Security**, allow it so ClipboardBar can read
-> your copied text.
+> **Permissions:**
+> - On first run, allow **pasteboard** access in **System Settings → Privacy &
+>   Security** so ClipboardBar can read your copied text.
+> - To use the global **⌘⇧V** hotkey, allow **Accessibility** access for
+>   ClipboardBar in **System Settings → Privacy & Security → Accessibility**.
+>   (The app still works fully with the menu bar icon if you skip this.)
 
 ---
 
@@ -95,11 +105,16 @@ ClipboardBar/
 
 The app creates a menu bar item (`NSStatusItem`) with a popover containing a SwiftUI
 panel. A lightweight 500ms timer compares `NSPasteboard.general.changeCount` against the
-last seen value. When it changes, ClipboardBar reads the new text, dedupes it against
-existing history, inserts it at the top, and trims the list down to a fixed maximum.
+last seen value. When it changes, ClipboardBar reads the new text or image data, dedupes
+it against existing history, inserts it at the top, and trims the list down to a fixed
+maximum.
 
-Pinned clips are never evicted and are always sorted above unpinned ones. Nothing is
-written to disk in v1 — history is held in memory for the current session.
+Pinned clips are never evicted and are always sorted above unpinned ones. The history is
+encoded to JSON and saved to `UserDefaults` on every change, then reloaded on launch, so
+clips and pins survive restarts. Unpinned clips older than 30 days are pruned on startup.
+
+For keyboard access, a global key monitor listens for **⌘⇧V** to pop the panel open from
+any app, and a local monitor routes **↑ / ↓ / Enter / Esc** to move, copy, or dismiss.
 
 ---
 
@@ -107,6 +122,5 @@ written to disk in v1 — history is held in memory for the current session.
 
 - **Ad-hoc signed** — suitable for personal use and sharing with friends; it isn't
   notarized for distribution through the Mac App Store.
-- **In-memory history** — clips don't persist across app restarts in v1.
 - To distribute more widely, you'd want to add **Apple Developer notarization**, which
   removes the "unverified developer" warning.
