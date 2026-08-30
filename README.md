@@ -10,6 +10,19 @@ after you've copied a dozen other things in between.
 
 No Dock icon, no setup. It just works.
 
+> 🤖 **For AI agents & contributors:** see [AGENTS.md](./AGENTS.md) for a concise
+> build / install / architecture reference.
+
+---
+
+## Quick start
+
+- **Install:** download `ClipboardBar.zip` from the latest
+  [release](https://github.com/danialjeffry/ClipboardBar/releases), extract,
+  and move `ClipboardBar.app` to **Applications**.
+- **Build:** `./Scripts/build.sh` → outputs `ClipboardBar.app`.
+- **Use:** copy anything, then open the panel with the menu bar icon or **⌘⇧V**.
+
 ---
 
 ## Features
