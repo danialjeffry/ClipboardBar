@@ -16,7 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: "Clipboard")
+            button.image = ClipboardBarIcon.makeMenuBarIcon()
             button.imagePosition = .imageLeading
             button.target = self
         }

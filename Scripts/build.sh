@@ -20,7 +20,7 @@ rm -rf "$ICON_TMP"
 echo "Compiling..."
 swiftc -O -target arm64-apple-macosx14.0 \
   -parse-as-library \
-  Sources/${APP_NAME}App.swift Sources/AppDelegate.swift Sources/ClipboardModel.swift Sources/MenuBarView.swift \
+  Sources/${APP_NAME}App.swift Sources/AppDelegate.swift Sources/ClipboardModel.swift Sources/ClipboardBarIcon.swift Sources/MenuBarView.swift \
   -o "${MACOS}/${APP_NAME}"
 
 cat > "${CONTENTS}/Info.plist" <<'PLIST'
